@@ -1,15 +1,64 @@
 {
-    // IntelliSense를 사용하여 가능한 특성에 대해 알아보세요.
-    // 기존 특성에 대한 설명을 보려면 가리킵니다.
-    // 자세한 내용을 보려면 https://go.microsoft.com/fwlink/?linkid=830387을(를) 방문하세요.
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "pwa-chrome",
+            "name": "[Clinet] Launch Chrome",
             "request": "launch",
-            "name": "Launch Chrome against localhost",
+            "type": "pwa-chrome",
             "url": "http://localhost:3000",
             "webRoot": "${workspaceFolder}/client"
+        },
+        {
+            "type": "pwa-node",
+            "request": "launch",
+            "name": "[API] Nodemon",
+            "runtimeExecutable": "${workspaceRoot}/api/node_modules/.bin/nodemon",
+            "args": ["${workspaceRoot}/api/bin/www,js"],
+            "cwd": "${workspaceRoot}/api",
+            "restart": true,
+            "stopOnEntry": false,
+            "runtimeArgs": [
+                "-V",
+                "--nolazy",
+                "--require",
+                "@babel/register",
+                "--trace-warnings"
+            ],
+            "sourceMaps": true,
+            "resolveSourceMapLocations": [
+                "${workspaceFolder}/api/**",
+                "!**/node_modules/**"
+            ]
+        },
+        {
+            "type": "pwa-node",
+            "request": "launch",
+            "name": "[API] Mocha Tests",
+            "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+            "args": [
+                "-u",
+                "bdd",
+                "--timeout",
+                "5000000000",
+                "--colors",
+                "--require",
+                "@babel/register",
+                "${workspaceFolder}/specs",
+                "--require",
+                "specs/hooks.js",
+                "--recursive",
+                "--trace-deprecation",
+                "--exit"
+            ],
+            "internalConsoleOptions": "openOnSessionStart",
+            "skipFiles": ["<node_internals>/**"],
+            "sourceMaps": true,
+            "runtimeExecutable": "/Users/jake/.nvm/versions/node/v14.13.1/bin/node",
+            "resolveSourceMapLocations": [
+                "${workspaceFolder}/**",
+                "!**/node_modules/**"
+            ],
+            "env": { "NODE_ENV": "development" }
         }
     ]
 }
