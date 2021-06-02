@@ -34,7 +34,8 @@
             "type": "pwa-node",
             "request": "launch",
             "name": "[API] Mocha Tests",
-            "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+            "program": "${workspaceFolder}/api/node_modules/mocha/bin/_mocha",
+            "cwd": "${workspaceRoot}/api",
             "args": [
                 "-u",
                 "bdd",
@@ -43,7 +44,7 @@
                 "--colors",
                 "--require",
                 "@babel/register",
-                "${workspaceFolder}/specs",
+                "${workspaceFolder}/api/specs",
                 "--require",
                 "specs/hooks.js",
                 "--recursive",
@@ -55,7 +56,7 @@
             "sourceMaps": true,
             "runtimeExecutable": "/Users/jake/.nvm/versions/node/v14.13.1/bin/node",
             "resolveSourceMapLocations": [
-                "${workspaceFolder}/**",
+                "${workspaceFolder}/api/**",
                 "!**/node_modules/**"
             ],
             "env": { "NODE_ENV": "development" }
