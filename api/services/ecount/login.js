@@ -10,12 +10,11 @@ const login = async () => {
     };
 
     const axiosConfig = {
-        baseURL: ECOUNT_API_BASEURL,
+        baseURL: process.env.ECOUNT_API_BASEURL,
         headers: {
             "Content-type": "application/json",
             Accept: "application/json",
         },
-        data: data,
     };
 
     return axios.post("/OAPILogin", param, axiosConfig);

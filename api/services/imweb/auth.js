@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const getAccessToken = async () => {
+const getAccessToken = () => {
     const data = {
         key: process.env.IMWEB_APIKEY,
         secret: process.env.IMWEB_SECRETKEY,
@@ -13,18 +13,29 @@ const getAccessToken = async () => {
         data: data,
     };
 
-    let token;
-    try {
-        const res = await axios.get(
-            process.env.IMWEB_API_BASEURL + "/auth",
-            axiosConfig,
-        );
-        if (res.status == 200 && res.data.access_token) {
-            token = res.data.access_token;
+    return new Promise(async (resolve, reject) => {
+        try {
+            const res = await axios.get(
+                process.env.IMWEB_API_BASEURL + "/auth",
+                axiosConfig,
+            );
+            if (res.status == 200 && res.data.access_token)
+                resolve(res.data.access_token);
+            else reject();
+        } catch (error) {
+            reject();
         }
-    } catch (error) {}
-
-    return token;
+    });
+    // return axios
+    //     .get(process.env.IMWEB_API_BASEURL + "/auth", axiosConfig)
+    //     .then((res) => {
+    //         if (res.status == 200 && res.data.access_token)
+    //             return res.data.access_token;
+    //         else return null;
+    //     })
+    //     .catch((error) => {
+    //         return null;
+    //     });
 };
 
 export { getAccessToken };
