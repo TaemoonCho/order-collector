@@ -1,11 +1,6 @@
 import axios from "axios";
 import { accessToken } from "./accessToken";
-
-const interval = parseInt(process.env.IMWEB_API_CALL_INTERVAL_MILSEC);
-
-const sleep = (ms) => {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-};
+import { sleep } from "../../util/sleep";
 
 const getProductOption = async (productNumber, productName) => {
     return new Promise(async (resolve, reject) => {
