@@ -95,8 +95,8 @@ const parseInfoFromOrder = (aOrder) => {
     if (!develiveryTime)
         ret.error = `Invalid delivery Time (${aOrder.form[0].value})`;
     else {
-        ret.deliveryTimeKeyString = develiveryTime.keyString;
-        ret.eliveryStartTimestamp = develiveryTime.startTimestamp;
+        ret.deliveryTimeString = develiveryTime.keyString;
+        ret.deliveryStartTime = develiveryTime.startTimestamp;
     }
     return ret;
 };

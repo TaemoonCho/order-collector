@@ -1,8 +1,8 @@
 const PaymentType = {
-    Cash: "10",
-    Transfer: "14",
-    CardOnDelivery: "13",
-    PointInFull: "15",
+    Cash: "cash", //"10",
+    CardOnDelivery: "cardOD", //"13",
+    Transfer: "transfer", //"14",
+    PointInFull: "point", //"15",
     Uknown: "Unkown",
 };
 
@@ -20,4 +20,23 @@ const koreanToPaymentType = (str) => {
     }
 };
 
-export { PaymentType, koreanToPaymentType };
+const paymentTypeStringToEcountPaymentType = (paymentType) => {
+    switch (paymentType) {
+        case PaymentType.Cash:
+            return "10";
+        case PaymentType.Transfer:
+            return "14";
+        case PaymentType.CardOnDelivery:
+            return "13";
+        case PaymentType.PointInFull:
+            return "15";
+        default:
+            return "Unkown";
+    }
+};
+
+export {
+    PaymentType,
+    koreanToPaymentType,
+    paymentTypeStringToEcountPaymentType,
+};
