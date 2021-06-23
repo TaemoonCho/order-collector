@@ -4,6 +4,8 @@ import { sleep } from "../../util/sleep";
 import { koreanToPaymentType } from "../../util/paymentType";
 import { koreanToDeliveryTime } from "../../util/deliveryTime";
 import { chunkenizeArray } from "../../util/array";
+import { isEmptyObject } from "../../util/object";
+
 const intervalToGetOrder = process.env.IMWEB_GET_ORDER_FROM_DAYS * 86400;
 const getProductsFromMultipleOrder = async (orderNumbers) => {
     const accessTokenInstance = await accessToken.getInstance();
@@ -24,41 +26,47 @@ const getProductsFromMultipleOrder = async (orderNumbers) => {
             `${process.env.IMWEB_API_BASEURL}/shop/prod-orders`,
             axiosConfig,
         );
+        console.log("/shop/prod-orders");
         console.log(res.data.data);
         orderNumbers.forEach((orderNo) => {
             const aOrderProducts = [];
             const aOrderInfo = res.data.data[orderNo];
             let itemIndex = 0;
             console.log(aOrderInfo);
-            Object.entries(aOrderInfo).forEach((entry) => {
-                const [key, value] = entry;
-                value.items.forEach((item) => {
-                    const aItem = {
-                        productNo: item.prod_no,
-                        productName: item.prod_name,
-                        sku: item.prod_sku_no,
-                        unitPrice: item.payment.price / item.payment.count,
-                        quantity: item.payment.count,
-                    };
-                    if (item.options && item.options.length > 0) {
-                        item.options[0].forEach((option) => {
-                            aItem.productName = `${aItem.productName} (${option.option_name_list[0]}:${option.value_name_list[0]})`;
-                            if (
-                                option.stock_sku_no &&
-                                option.stock_sku_no.length > 0
-                            ) {
-                                aItem.sku = option.stock_sku_no[0];
-                            }
-                            aItem.quantity = option.payment.count;
-                            aItem.unitPrice =
-                                option.payment.price / option.payment.count;
-                        });
-                    }
-                    aOrderProducts[itemIndex] = aItem;
-                    itemIndex++;
+            if (typeof aOrderInfo === "object") {
+                Object.entries(aOrderInfo).forEach((entry) => {
+                    const [key, value] = entry;
+
+                    value.items.forEach((item) => {
+                        const aItem = {
+                            productNo: item.prod_no,
+                            productName: item.prod_name,
+                            sku: item.prod_sku_no,
+                            unitPrice: item.payment.price / item.payment.count,
+                            quantity: item.payment.count,
+                        };
+                        if (item.options && item.options.length > 0) {
+                            item.options[0].forEach((option) => {
+                                aItem.productName = `${aItem.productName} (${option.option_name_list[0]}:${option.value_name_list[0]})`;
+                                if (
+                                    option.stock_sku_no &&
+                                    option.stock_sku_no.length > 0
+                                ) {
+                                    aItem.sku = option.stock_sku_no[0];
+                                }
+                                aItem.quantity = option.payment.count;
+                                aItem.unitPrice =
+                                    option.payment.price / option.payment.count;
+                            });
+                        }
+                        aOrderProducts[itemIndex] = aItem;
+                        itemIndex++;
+                    });
+                    console.log(entry);
                 });
-                console.log(entry);
-            });
+            } else {
+                // 제품 목록을 가져오지 못 한 주문일 경우 처리.
+            }
             list[orderIndex] = aOrderProducts;
             orderIndex++;
         });
@@ -71,14 +79,19 @@ const getProductsFromMultipleOrder = async (orderNumbers) => {
 };
 
 const parseInfoFromOrder = (aOrder) => {
+    const error = {};
     const phone = aOrder.delivery.address.phone2
         ? `${aOrder.delivery.address.phone}(${aOrder.delivery.address.phone2})`
         : aOrder.delivery.address.phone;
     const address = `${aOrder.delivery.address.address} ${aOrder.delivery.address.address_detail}`;
 
     const develiveryTime = koreanToDeliveryTime(aOrder.form[0].value);
+    if (!develiveryTime)
+        error.develiveryTime = `Invalid deliveryTime (${aOrder.form[0].value})`;
 
     const payType = koreanToPaymentType(aOrder.form[1].value);
+    if (!payType) error.payType = `Invalid payType (${aOrder.form[1].value})`;
+
     const point = aOrder.payment.point ? aOrder.payment.point : 0;
     const ret = {
         orderNo: aOrder.order_no,
@@ -86,15 +99,16 @@ const parseInfoFromOrder = (aOrder) => {
         recipientName: aOrder.delivery.address.name,
         recipientPhone: phone,
         recipientAddress: address,
+        deliveryMemo: aOrder.deliveryMemo,
         buyerName: aOrder.orderer.name,
         buyerEmail: aOrder.orderer.email,
+        depositorName: "Imweb", // 현재 미지원 TODO
         paymentType: payType,
         pointUsed: point,
         totalPrice: aOrder.payment.total_price,
+        error: error,
     };
-    if (!develiveryTime)
-        ret.error = `Invalid delivery Time (${aOrder.form[0].value})`;
-    else {
+    if (develiveryTime) {
         ret.deliveryTimeString = develiveryTime.keyString;
         ret.deliveryStartTime = develiveryTime.startTimestamp;
     }
@@ -136,7 +150,8 @@ const getAllOrdersByPagination = async (
         `${process.env.IMWEB_API_BASEURL}/shop/orders`,
         axiosConfig,
     );
-
+    console.log("/shop/orders");
+    console.log(res.data.data);
     if (
         res.status == 200 &&
         res.data.code == 200 &&
@@ -167,8 +182,24 @@ const getAllOrdersByPagination = async (
             const products = await getProductsFromMultipleOrder(
                 chunkenizedListToGetProduct[productPage - 1],
             );
-            console.log(products);
             for (let k = 0; k < products.length; k++) {
+                if (products[k].length == 0) {
+                    list[currentProductIndex].error.products =
+                        "Could not get products from Imweb(/shop/prod-orders).";
+                }
+                if (isEmptyObject(list[currentProductIndex].error)) {
+                    list[currentProductIndex].error = null;
+                }
+                // 사용된 포인트가 있다면
+                if (list[currentProductIndex].pointUsed > 0) {
+                    products[k][products[k].length] = {
+                        productNo: 0,
+                        productName: "포인트 사용",
+                        unitPrice: -1 * list[currentProductIndex].pointUsed,
+                        sku: "Method0002",
+                        quantity: 1,
+                    };
+                }
                 list[currentProductIndex].products = products[k];
                 currentProductIndex++;
             }
