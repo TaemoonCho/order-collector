@@ -26,13 +26,13 @@ const getProductsFromMultipleOrder = async (orderNumbers) => {
             `${process.env.IMWEB_API_BASEURL}/shop/prod-orders`,
             axiosConfig,
         );
-        console.log("/shop/prod-orders");
-        console.log(res.data.data);
+        // console.log("/shop/prod-orders");
+        // console.log(res.data.data);
         orderNumbers.forEach((orderNo) => {
             const aOrderProducts = [];
             const aOrderInfo = res.data.data[orderNo];
             let itemIndex = 0;
-            console.log(aOrderInfo);
+            // console.log(aOrderInfo);
             if (typeof aOrderInfo === "object") {
                 Object.entries(aOrderInfo).forEach((entry) => {
                     const [key, value] = entry;
@@ -62,7 +62,7 @@ const getProductsFromMultipleOrder = async (orderNumbers) => {
                         aOrderProducts[itemIndex] = aItem;
                         itemIndex++;
                     });
-                    console.log(entry);
+                    // console.log(entry);
                 });
             } else {
                 // 제품 목록을 가져오지 못 한 주문일 경우 처리.
@@ -72,7 +72,7 @@ const getProductsFromMultipleOrder = async (orderNumbers) => {
         });
         return list;
     } catch (error) {
-        console.log(error);
+        // console.log(error);
         return null;
     }
     return res.data.data;
@@ -150,8 +150,8 @@ const getAllOrdersByPagination = async (
         `${process.env.IMWEB_API_BASEURL}/shop/orders`,
         axiosConfig,
     );
-    console.log("/shop/orders");
-    console.log(res.data.data);
+    // console.log("/shop/orders");
+    // console.log(res.data.data);
     if (
         res.status == 200 &&
         res.data.code == 200 &&
@@ -178,7 +178,7 @@ const getAllOrdersByPagination = async (
             productPage <= chunkenizedListToGetProduct.length;
             productPage++
         ) {
-            console.log(chunkenizedListToGetProduct[productPage - 1]);
+            // console.log(chunkenizedListToGetProduct[productPage - 1]);
             const products = await getProductsFromMultipleOrder(
                 chunkenizedListToGetProduct[productPage - 1],
             );
