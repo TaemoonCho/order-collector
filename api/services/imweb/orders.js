@@ -186,7 +186,25 @@ const getAllOrdersByPagination = async (
                 if (products[k].length == 0) {
                     list[currentProductIndex].error.products =
                         "Could not get products from Imweb(/shop/prod-orders).";
+                } else {
+                    let noSKUmessage = "";
+                    products[k].forEach((product) => {
+                        if (
+                            !product.sku ||
+                            typeof product.sku != "string" ||
+                            product.sku.length > 0
+                        ) {
+                            if (noSKUmessage.length > 0) {
+                                noSKUmessage += "\n";
+                            }
+                            noSKUmessage += `No SKU (${product.productName})`;
+                        }
+                    });
+                    if (noSKUmessage.length > 0) {
+                        list[currentProductIndex].error.products = noSKUmessage;
+                    }
                 }
+
                 if (isEmptyObject(list[currentProductIndex].error)) {
                     list[currentProductIndex].error = null;
                 }

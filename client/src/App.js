@@ -2,9 +2,8 @@ import React, { Component } from "react";
 // import ReactDOM from "react-dom";
 import logo from "./ms_logo_512.png";
 import "./App.css";
-
 import Check from "./comp/Check";
-
+import Orders from "./comp/Orders";
 // import CircularProgress from "@material-ui/core/CircularProgress";
 // import { withStyles } from "@material-ui/core/styles";
 
@@ -92,7 +91,7 @@ class App extends Component {
                         &nbsp;&nbsp;&nbsp;&nbsp;
                         <br />
                         <p>
-                            <b>Order collector</b>
+                            <b>ORDER MANAGER</b>
                         </p>
                     </div>
                     <p align="right" className="subtitle">
@@ -100,6 +99,7 @@ class App extends Component {
                     </p>
                 </header>
                 <Check />
+                <Orders />
             </div>
         );
     }
