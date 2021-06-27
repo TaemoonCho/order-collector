@@ -8,6 +8,9 @@ import IconButton from "@material-ui/core/IconButton";
 import Typography from "@material-ui/core/Typography";
 import CloseIcon from "@material-ui/icons/Close";
 import Slide from "@material-ui/core/Slide";
+import Popover from "@material-ui/core/Popover";
+import Alert from "@material-ui/lab/Alert";
+import ResultTable from "./ResultTable";
 
 import { Publish } from "@material-ui/icons";
 
@@ -48,10 +51,21 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 export default function Upload(props) {
     const classes = useStyles();
     const [open, setOpen] = React.useState(false);
+    const [anchorEl, setAnchorEl] = React.useState(null);
 
-    const handleClickOpen = () => {
+    const popoverOpen = Boolean(anchorEl);
+    const popoverId = popoverOpen ? "popover" : undefined;
+    const handleClosePopover = () => {
+        setAnchorEl(null);
+    };
+
+    const handleClickOpen = (event) => {
         console.log(props);
-        setOpen(true);
+        if (props.orders && props.orders.length > 0) {
+            setOpen(true);
+        } else {
+            setAnchorEl(event.currentTarget);
+        }
     };
 
     const handleClose = () => {
@@ -70,6 +84,24 @@ export default function Upload(props) {
             >
                 UPLOAD TO ECOUNT
             </Button>
+            <Popover
+                id={popoverId}
+                open={popoverOpen}
+                anchorEl={anchorEl}
+                onClose={handleClosePopover}
+                anchorOrigin={{
+                    vertical: "top",
+                    horizontal: "left",
+                }}
+                transformOrigin={{
+                    vertical: "center",
+                    horizontal: "right",
+                }}
+            >
+                <Alert severity="error">
+                    There is no seleted order! Select at least an order.
+                </Alert>
+            </Popover>
             <Dialog
                 fullScreen
                 open={open}
@@ -98,6 +130,7 @@ export default function Upload(props) {
                         </Button>
                     </Toolbar>
                 </AppBar>
+                <ResultTable orders={props.orders} />
             </Dialog>
         </div>
     );
